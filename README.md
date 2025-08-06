@@ -1,4 +1,4 @@
-# Vallen Stored Procedure Factory
+# Stored Procedure Factory
 
 A reusable PHP library for executing stored procedures on Microsoft SQL Server databases using both PDO and SqlSrv extensions.
 
@@ -33,7 +33,7 @@ Add the package to your `composer.json`:
         }
     ],
     "require": {
-        "vallen/stored-procedure-factory": "*"
+        "vallen-webpack/stored-procedure-bundle": "*"
     }
 }
 ```
@@ -49,7 +49,7 @@ composer install
 If you publish this to a private repository:
 
 ```bash
-composer require vallen/stored-procedure-factory
+composer require web-slinger/stored-procedure-bundle
 ```
 
 ## Usage
@@ -57,7 +57,7 @@ composer require vallen/stored-procedure-factory
 ### Basic Usage
 
 ```php
-use Vallen\StoredProcedureFactory\StoredProcedureFactory;
+use WebSlinger\StoredProcedureFactory\StoredProcedureFactory;
 
 // Initialize the factory
 $factory = new StoredProcedureFactory(
@@ -107,20 +107,30 @@ $results = $factory->runProcedure(
 
 ### Symfony Integration
 
-Add to your `services.yaml`:
+This package provides two ways to integrate with Symfony:
 
-```yaml
-Vallen\StoredProcedureFactory\StoredProcedureFactory:
-    bind:
-        $hostname: '%env(resolve:SP_HOST)%'
-        $pwd: '%env(resolve:SP_PASS)%'
-        $username: '%env(resolve:SP_USER)%'
-```
-
-Then inject it into your services:
+1. Register the bundle in your `config/bundles.php`:
 
 ```php
-use Vallen\StoredProcedureFactory\StoredProcedureFactory;
+return [
+    // ... other bundles
+    WebSlinger\StoredProcedureFactory\VallenStoredProcedureBundle::class => ['all' => true],
+];
+```
+
+2. Configure the bundle in `config/packages/web_slinger.yaml`:
+
+```yaml
+stored_procedure_call:
+    hostname: '%env(SP_HOST)%'
+    username: '%env(SP_USER)%'
+    password: '%env(SP_PASS)%'
+```
+
+3. The service will be automatically available for autowiring:
+
+```php
+use WebSlinger\StoredProcedureFactory\StoredProcedureFactory;
 
 class YourService
 {
@@ -171,38 +181,6 @@ The factory integrates with Sentry for error logging. All exceptions are automat
 - **Success**: Returns an array of results from the stored procedure
 - **Failure**: Returns `false` (unless debug messages are enabled, then throws exception)
 - **UTF-8 Encoding**: All string values in results are automatically UTF-8 encoded
-
-## Migration from App\Factory\StoredProcedureFactory
-
-If you're migrating from the original `App\Factory\StoredProcedureFactory`:
-
-1. Update your import statements:
-   ```php
-   // Old
-   use App\Factory\StoredProcedureFactory;
-   
-   // New
-   use Vallen\StoredProcedureFactory\StoredProcedureFactory;
-   ```
-
-2. Update your service configuration in `services.yaml`:
-   ```yaml
-   # Old
-   App\Factory\StoredProcedureFactory:
-       bind:
-           $hostname: '%env(resolve:SP_HOST)%'
-           $pwd: '%env(resolve:SP_PASS)%'
-           $username: '%env(resolve:SP_USER)%'
-   
-   # New
-   Vallen\StoredProcedureFactory\StoredProcedureFactory:
-       bind:
-           $hostname: '%env(resolve:SP_HOST)%'
-           $pwd: '%env(resolve:SP_PASS)%'
-           $username: '%env(resolve:SP_USER)%'
-   ```
-
-3. The API remains the same, so no changes to method calls are required.
 
 ## License
 

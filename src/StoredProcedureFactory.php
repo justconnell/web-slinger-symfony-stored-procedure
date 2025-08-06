@@ -3,15 +3,13 @@
  * For Stored Procedure calls to MSSQL DB
  */
 
-namespace Vallen\StoredProcedureFactory;
+namespace WebSlinger\StoredProcedureFactory;
 
 use Exception;
 use PDO;
 use PDOException;
 use stdClass;
 use Throwable;
-
-use function Sentry\captureException;
 
 class StoredProcedureFactory
 {

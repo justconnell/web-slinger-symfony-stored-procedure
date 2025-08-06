@@ -1,0 +1,12 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    WebSlinger\StoredProcedureFactory\StoredProcedureFactory:
+        arguments:
+            $hostname: '%webslinger.stored_procedure.hostname%'
+            $username: '%webslinger.stored_procedure.username%'
+            $pwd: '%webslinger.stored_procedure.password%'
+        public: true
