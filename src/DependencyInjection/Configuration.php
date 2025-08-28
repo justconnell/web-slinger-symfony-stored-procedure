@@ -29,6 +29,9 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->variableNode('mailer_factory')
+                    ->info('Configuration for web-slinger mailer factory bundle')
+                ->end()
             ->end();
 
         return $treeBuilder;
