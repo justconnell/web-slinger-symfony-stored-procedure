@@ -1,195 +1,97 @@
-# Stored Procedure Factory
+# WebSlinger Stored Procedure Bundle
 
-A reusable PHP library for executing stored procedures on Microsoft SQL Server databases using both PDO and SqlSrv extensions.
-
-## Features
-
-- Support for both PDO and native SqlSrv connections
-- Automatic UTF-8 encoding of results
-- Parameter binding for secure query execution
-- Error handling with Sentry integration
-- Server override capability for multi-server environments
-- Configurable database selection
-
-## Requirements
-
-- PHP 8.1 or higher
-- PDO extension with SQL Server driver
-- Sentry SDK for error logging
-- Optional: SqlSrv extension for native SQL Server support
+A reusable factory for executing stored procedures on MSSQL databases using PDO and SqlSrv.
 
 ## Installation
 
-### Via Composer (Local Package)
-
-Add the package to your `composer.json`:
-
-```json
-{
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../vallen-stored-procedure-factory"
-        }
-    ],
-    "require": {
-        "vallen-webpack/stored-procedure-bundle": "*"
-    }
-}
-```
-
-Then run:
-
-```bash
-composer install
-```
-
-### Via Composer (Private Repository)
-
-If you publish this to a private repository:
+Install the package via Composer:
 
 ```bash
 composer require web-slinger/stored-procedure-bundle
 ```
 
-## Usage
+**Note**: The installation process will automatically:
+- Create `config/packages/web_slinger.yaml` with the bundle configuration
+- Add environment variables to your `.env` or `.env.local` file
+- Register the bundle (if using Symfony Flex)
 
-### Basic Usage
+## Configuration
 
-```php
-use WebSlinger\StoredProcedureFactory\StoredProcedureFactory;
-
-// Initialize the factory
-$factory = new StoredProcedureFactory(
-    hostname: 'your-sql-server.com',
-    username: 'your-username',
-    pwd: 'your-password'
-);
-
-// Execute a stored procedure
-$results = $factory->runProcedure(
-    procedure: 'YourStoredProcedure',
-    params: [
-        'param1' => 'value1',
-        'param2' => 'value2'
-    ],
-    database: 'YourDatabase'
-);
-```
-
-### Advanced Usage
+Add the bundle to your `config/bundles.php`:
 
 ```php
-// Using SqlSrv instead of PDO
-$results = $factory->runProcedure(
-    procedure: 'YourStoredProcedure',
-    params: ['param1' => 'value1'],
-    database: 'YourDatabase',
-    useSqlSrv: true
-);
+<?php
 
-// Using server override
-$results = $factory->runProcedure(
-    procedure: 'YourStoredProcedure',
-    params: ['param1' => 'value1'],
-    database: 'YourDatabase',
-    serverOverride: 'backup-server.com'
-);
-
-// Enable debug messages
-$results = $factory->runProcedure(
-    procedure: 'YourStoredProcedure',
-    params: ['param1' => 'value1'],
-    database: 'YourDatabase',
-    returnDebugMessage: true
-);
-```
-
-### Symfony Integration
-
-This package provides two ways to integrate with Symfony:
-
-1. Register the bundle in your `config/bundles.php`:
-
-```php
 return [
     // ... other bundles
-    WebSlinger\StoredProcedureFactory\VallenStoredProcedureBundle::class => ['all' => true],
+    WebSlinger\StoredProcedureFactory\WebSlingerStoredProcedureBundle::class => ['all' => true],
 ];
 ```
 
-2. Configure the bundle in `config/packages/web_slinger.yaml`:
+Configure the database connection in `config/packages/web_slinger.yaml`:
 
 ```yaml
-stored_procedure_call:
-    hostname: '%env(SP_HOST)%'
-    username: '%env(SP_USER)%'
-    password: '%env(SP_PASS)%'
+web_slinger:
+    stored_procedure:
+        hostname: 'your-database-server'
+        username: 'your-username'
+        password: 'your-password'
 ```
 
-3. The service will be automatically available for autowiring:
+## Usage
+
+Inject the `StoredProcedureFactory` service into your controllers or services:
 
 ```php
-use WebSlinger\StoredProcedureFactory\StoredProcedureFactory;
+<?php
 
-class YourService
+namespace App\Controller;
+
+use WebSlinger\StoredProcedureFactory\StoredProcedureFactory;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
+class MyController extends AbstractController
 {
     public function __construct(
-        private readonly StoredProcedureFactory $storedProcedureFactory
+        private StoredProcedureFactory $storedProcedureFactory
     ) {}
 
-    public function getData(): array
+    public function someAction(): Response
     {
-        return $this->storedProcedureFactory->runProcedure(
-            'GetData',
-            ['userId' => 123]
+        $results = $this->storedProcedureFactory->runProcedure(
+            'MyStoredProcedure',
+            ['param1' => 'value1', 'param2' => 'value2'],
+            'MyDatabase'
         );
+
+        // Process results...
+        return $this->json($results);
     }
 }
 ```
 
-## Configuration
+## Method Parameters
 
-### Environment Variables
+The `runProcedure` method accepts the following parameters:
 
-Set the following environment variables:
+- `$procedure` (string): Name of the stored procedure
+- `$params` (array): Associative array of parameters (default: `[]`)
+- `$database` (string): Database name (default: `'Storeroom'`)
+- `$useSqlSrv` (bool): Use SqlSrv instead of PDO (default: `false`)
+- `$returnDebugMessage` (bool): Return debug messages on error (default: `false`)
+- `$serverOverride` (?string): Override the configured hostname (default: `null`)
 
-```env
-SP_HOST=your-sql-server.com
-SP_USER=your-username
-SP_PASS=your-password
-```
+## Requirements
 
-### Connection Options
+- PHP >= 8.1
+- ext-pdo
+- Symfony >= 5.4
+- SQL Server database
 
-The factory supports several connection options:
+### Optional Extensions
 
-- **hostname**: SQL Server hostname or IP address
-- **username**: Database username
-- **pwd**: Database password
-- **database**: Target database name (default: 'Storeroom')
-- **useSqlSrv**: Use native SqlSrv extension instead of PDO (default: false)
-- **serverOverride**: Override the default hostname for specific calls
-- **returnDebugMessage**: Return detailed error messages (default: false)
-
-## Error Handling
-
-The factory integrates with Sentry for error logging. All exceptions are automatically captured and logged. You can enable debug messages by setting `returnDebugMessage` to `true`.
-
-## Return Values
-
-- **Success**: Returns an array of results from the stored procedure
-- **Failure**: Returns `false` (unless debug messages are enabled, then throws exception)
-- **UTF-8 Encoding**: All string values in results are automatically UTF-8 encoded
+- ext-sqlsrv: For native SQL Server support (when using `$useSqlSrv = true`)
 
 ## License
 
-MIT License
-
-## Contributing
-
-Please follow PSR-12 coding standards and include tests for any new features.
-
-## Support
-
-For issues and questions, please contact the Vallen development team.
+MIT

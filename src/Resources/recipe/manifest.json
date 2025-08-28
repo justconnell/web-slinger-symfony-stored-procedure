@@ -1,0 +1,13 @@
+{
+    "bundles": {
+        "WebSlinger\\StoredProcedureFactory\\WebSlingerStoredProcedureBundle": ["all"]
+    },
+    "copy-from-recipe": {
+        "config/": "%CONFIG_DIR%/"
+    },
+    "env": {
+        "WEB_SLINGER_SP_HOST": "your-database-server",
+        "WEB_SLINGER_SP_USERNAME": "your-username", 
+        "WEB_SLINGER_SP_PASSWORD": "your-password"
+    }
+}

@@ -19,9 +19,9 @@ class WebSlingerStoredProcedureExtension extends Extension
         $loader->load('services.yaml');
 
         // Set parameters for the StoredProcedureFactory service
-        $container->setParameter('webslinger.stored_procedure.hostname', $config['hostname']);
-        $container->setParameter('webslinger.stored_procedure.username', $config['username']);
-        $container->setParameter('webslinger.stored_procedure.password', $config['password']);
+        $container->setParameter('webslinger.stored_procedure.hostname', $config['stored_procedure']['hostname']);
+        $container->setParameter('webslinger.stored_procedure.username', $config['stored_procedure']['username']);
+        $container->setParameter('webslinger.stored_procedure.password', $config['stored_procedure']['password']);
     }
 
     public function getAlias(): string
