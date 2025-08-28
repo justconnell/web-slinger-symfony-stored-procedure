@@ -2,60 +2,82 @@
 
 namespace WebSlinger\StoredProcedureFactory\Command;
 
-use Composer\Script\Event;
-use Composer\IO\IOInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
-class InstallCommand
+#[AsCommand(
+    name: 'web-slinger:setup',
+    description: 'Set up the WebSlinger Stored Procedure Bundle configuration files',
+)]
+class InstallCommand extends Command
 {
-    public static function postInstall(Event $event): void
+    public function __construct(private string $projectDir)
     {
-        $io = $event->getIO();
-        $vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');
-        $projectRoot = dirname($vendorDir);
-
-        self::createConfigFile($io, $projectRoot);
-        self::updateEnvFile($io, $projectRoot);
+        parent::__construct();
     }
 
-    private static function createConfigFile(IOInterface $io, string $projectRoot): void
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $configDir = $projectRoot . '/config/packages';
+        $io = new SymfonyStyle($input, $output);
+        
+        $io->title('WebSlinger Stored Procedure Bundle Setup');
+
+        $this->createConfigFile($io);
+        $this->updateEnvFile($io);
+        
+        $io->success('WebSlinger Stored Procedure Bundle has been configured successfully!');
+        $io->note([
+            'Please configure the following environment variables in your .env file:',
+            '  WEB_SLINGER_SP_HOST=your-database-server',
+            '  WEB_SLINGER_SP_USERNAME=your-username',
+            '  WEB_SLINGER_SP_PASSWORD=your-password'
+        ]);
+        
+        return Command::SUCCESS;
+    }
+
+    private function createConfigFile(SymfonyStyle $io): void
+    {
+        $configDir = $this->projectDir . '/config/packages';
         $configFile = $configDir . '/web_slinger.yaml';
 
         if (!is_dir($configDir)) {
             if (!mkdir($configDir, 0755, true)) {
-                $io->writeError('Could not create config directory: ' . $configDir);
+                $io->error('Could not create config directory: ' . $configDir);
                 return;
             }
         }
 
         if (file_exists($configFile)) {
-            $io->write('Configuration file already exists: ' . $configFile);
+            $io->note('Configuration file already exists: ' . $configFile);
             return;
         }
 
-        $configContent = self::getConfigTemplate();
+        $configContent = $this->getConfigTemplate();
         
         if (file_put_contents($configFile, $configContent) === false) {
-            $io->writeError('Could not create configuration file: ' . $configFile);
+            $io->error('Could not create configuration file: ' . $configFile);
             return;
         }
 
-        $io->write('Created configuration file: ' . $configFile);
+        $io->text('✓ Created configuration file: ' . $configFile);
     }
 
-    private static function updateEnvFile(IOInterface $io, string $projectRoot): void
+    private function updateEnvFile(SymfonyStyle $io): void
     {
-        $envFile = $projectRoot . '/.env';
-        $envLocalFile = $projectRoot . '/.env.local';
+        $envFile = $this->projectDir . '/.env';
+        $envLocalFile = $this->projectDir . '/.env.local';
         
-        $envContent = self::getEnvTemplate();
+        $envContent = $this->getEnvTemplate();
 
         // Check if variables already exist in .env
         if (file_exists($envFile)) {
             $existingContent = file_get_contents($envFile);
             if (strpos($existingContent, 'WEB_SLINGER_SP_HOST') !== false) {
-                $io->write('Environment variables already exist in .env file');
+                $io->note('Environment variables already exist in .env file');
                 return;
             }
         }
@@ -71,24 +93,20 @@ class InstallCommand
             }
             
             if (file_put_contents($targetFile, $envContent, FILE_APPEND | LOCK_EX) === false) {
-                $io->writeError('Could not update environment file: ' . $targetFile);
+                $io->error('Could not update environment file: ' . $targetFile);
                 return;
             }
         } else {
             if (file_put_contents($targetFile, $envContent) === false) {
-                $io->writeError('Could not create environment file: ' . $targetFile);
+                $io->error('Could not create environment file: ' . $targetFile);
                 return;
             }
         }
 
-        $io->write('Updated environment variables in: ' . $targetFile);
-        $io->write('Please configure the following environment variables:');
-        $io->write('  WEB_SLINGER_SP_HOST=your-database-server');
-        $io->write('  WEB_SLINGER_SP_USERNAME=your-username');
-        $io->write('  WEB_SLINGER_SP_PASSWORD=your-password');
+        $io->text('✓ Updated environment variables in: ' . $targetFile);
     }
 
-    private static function getConfigTemplate(): string
+    private function getConfigTemplate(): string
     {
         return <<<YAML
 # WebSlinger Stored Procedure Bundle Configuration
@@ -100,7 +118,7 @@ web_slinger:
 YAML;
     }
 
-    private static function getEnvTemplate(): string
+    private function getEnvTemplate(): string
     {
         return <<<ENV
 

@@ -10,3 +10,9 @@ services:
             $username: '%webslinger.stored_procedure.username%'
             $pwd: '%webslinger.stored_procedure.password%'
         public: true
+
+    WebSlinger\StoredProcedureFactory\Command\InstallCommand:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+        tags:
+            - { name: 'console.command' }

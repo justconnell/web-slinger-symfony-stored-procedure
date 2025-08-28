@@ -10,14 +10,21 @@ Install the package via Composer:
 composer require web-slinger/stored-procedure-bundle
 ```
 
-**Note**: The installation process will automatically:
+## Setup
+
+After installation, run the setup command to create configuration files:
+
+```bash
+php bin/console web-slinger:setup
+```
+
+This will:
 - Create `config/packages/web_slinger.yaml` with the bundle configuration
-- Add environment variables to your `.env` or `.env.local` file
-- Register the bundle (if using Symfony Flex)
+- Add environment variables to your `.env` file
 
 ## Configuration
 
-Add the bundle to your `config/bundles.php`:
+The bundle will be automatically registered if you're using Symfony Flex. If not, add it manually to your `config/bundles.php`:
 
 ```php
 <?php
@@ -28,14 +35,13 @@ return [
 ];
 ```
 
-Configure the database connection in `config/packages/web_slinger.yaml`:
+Configure your database connection by updating the environment variables in your `.env` file:
 
-```yaml
-web_slinger:
-    stored_procedure:
-        hostname: 'your-database-server'
-        username: 'your-username'
-        password: 'your-password'
+```bash
+# Configure your SQL Server connection
+WEB_SLINGER_SP_HOST=your-database-server
+WEB_SLINGER_SP_USERNAME=your-username
+WEB_SLINGER_SP_PASSWORD=your-password
 ```
 
 ## Usage
