@@ -5,11 +5,9 @@ namespace WebSlinger\StoredProcedureFactory\DependencyInjection;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
-use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use WebSlinger\StoredProcedureFactory\StoredProcedureFactory;
 
-class WebSlingerStoredProcedureExtension extends Extension implements PrependExtensionInterface
+class WebSlingerStoredProcedureExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container): void
     {
@@ -28,18 +26,6 @@ class WebSlingerStoredProcedureExtension extends Extension implements PrependExt
 
     public function getAlias(): string
     {
-        return 'webslinger';
-    }
-
-    public function prepend(ContainerBuilder $container): void
-    {
-        // Add stored_procedure config to the webslinger tree with optional environment variables
-        $container->prependExtensionConfig('webslinger', [
-            'stored_procedure' => [
-                'hostname' => '%env(default::WEB_SLINGER_SP_HOST)%',
-                'username' => '%env(default::WEB_SLINGER_SP_USERNAME)%',
-                'password' => '%env(default::WEB_SLINGER_SP_PASSWORD)%'
-            ]
-        ]);
+        return 'web_slinger_stored_procedure';
     }
 }

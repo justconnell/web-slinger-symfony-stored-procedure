@@ -110,7 +110,7 @@ class InstallCommand extends Command
     {
         return <<<YAML
 # WebSlinger Stored Procedure Bundle Configuration
-webslinger:
+web_slinger_stored_procedure:
     stored_procedure:
         hostname: '%env(WEB_SLINGER_SP_HOST)%'
         username: '%env(WEB_SLINGER_SP_USERNAME)%'

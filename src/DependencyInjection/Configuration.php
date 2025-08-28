@@ -9,7 +9,7 @@ class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder('webslinger');
+        $treeBuilder = new TreeBuilder('web_slinger_stored_procedure');
 
         $treeBuilder->getRootNode()
             ->children()
@@ -28,9 +28,6 @@ class Configuration implements ConfigurationInterface
                             ->info('Database password')
                         ->end()
                     ->end()
-                ->end()
-                ->variableNode('mailer_factory')
-                    ->info('Configuration for web-slinger mailer factory bundle')
                 ->end()
             ->end();
 
