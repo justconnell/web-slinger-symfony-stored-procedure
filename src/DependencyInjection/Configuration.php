@@ -9,25 +9,22 @@ class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder('web_slinger');
+        $treeBuilder = new TreeBuilder('webslinger');
 
         $treeBuilder->getRootNode()
             ->children()
                 ->arrayNode('stored_procedure')
                     ->children()
                         ->scalarNode('hostname')
-                            ->isRequired()
-                            ->cannotBeEmpty()
+                            ->defaultValue('')
                             ->info('Database hostname')
                         ->end()
                         ->scalarNode('username')
-                            ->isRequired()
-                            ->cannotBeEmpty()
+                            ->defaultValue('')
                             ->info('Database username')
                         ->end()
                         ->scalarNode('password')
-                            ->isRequired()
-                            ->cannotBeEmpty()
+                            ->defaultValue('')
                             ->info('Database password')
                         ->end()
                     ->end()

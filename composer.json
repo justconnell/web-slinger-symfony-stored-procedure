@@ -34,14 +34,6 @@
     "require-dev": {
         "phpunit/phpunit": "^9.0|^10.0"
     },
-    "scripts": {
-        "post-install-cmd": [
-            "WebSlinger\\StoredProcedureFactory\\Command\\InstallCommand::postInstall"
-        ],
-        "post-update-cmd": [
-            "WebSlinger\\StoredProcedureFactory\\Command\\InstallCommand::postInstall"
-        ]
-    },
     "extra": {
         "symfony": {
             "allow-contrib": false,
