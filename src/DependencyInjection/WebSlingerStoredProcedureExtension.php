@@ -33,12 +33,12 @@ class WebSlingerStoredProcedureExtension extends Extension implements PrependExt
 
     public function prepend(ContainerBuilder $container): void
     {
-        // Add stored_procedure config to the webslinger tree
+        // Add stored_procedure config to the webslinger tree with optional environment variables
         $container->prependExtensionConfig('webslinger', [
             'stored_procedure' => [
-                'hostname' => '%env(WEB_SLINGER_SP_HOST)%',
-                'username' => '%env(WEB_SLINGER_SP_USERNAME)%',
-                'password' => '%env(WEB_SLINGER_SP_PASSWORD)%'
+                'hostname' => '%env(default::WEB_SLINGER_SP_HOST)%',
+                'username' => '%env(default::WEB_SLINGER_SP_USERNAME)%',
+                'password' => '%env(default::WEB_SLINGER_SP_PASSWORD)%'
             ]
         ]);
     }
