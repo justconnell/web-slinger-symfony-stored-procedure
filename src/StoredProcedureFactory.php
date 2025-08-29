@@ -47,6 +47,9 @@ class StoredProcedureFactory
                     $stmt->bindParam($property->placeholder, $property->value);
                 }
                 $stmt->execute();
+                if ($stmt->columnCount() === 0) {
+                    return [];
+                }
                 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 foreach ($results as $key => $result) {
                     $results[$key] = $this->utf8EncodeArray(array_change_key_case($result));
@@ -54,7 +57,6 @@ class StoredProcedureFactory
 
                 return $results;
             } catch (Throwable $exception) {
-                captureException($exception); // Capture in Sentry. If there's an issue we need to at least see it.
                 if ($returnDebugMessage) {
                     throw new PDOException(message: 'Error running '.$procedure.', message: '.$exception->getMessage());
                 }
@@ -74,9 +76,19 @@ class StoredProcedureFactory
                 return false;
             }
             $result = sqlsrv_query($this->client, $query, $params);
+            if ($result === false) {
+                return false;
+            }
             $results = [];
             do {
-                $results[] = (array)sqlsrv_fetch_object($result);
+                // If the current result set has no fields (e.g., only rowcount), skip fetching.
+                $meta = sqlsrv_field_metadata($result);
+                if ($meta === null || $meta === false || count($meta) === 0) {
+                    continue;
+                }
+                while ($obj = sqlsrv_fetch_object($result)) {
+                    $results[] = (array)$obj;
+                }
             } while (sqlsrv_next_result($result));
 
             return $results;
